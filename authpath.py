@@ -39,6 +39,8 @@ def sample(numleaves, height):
         accum_path += path(leaf, height)
         accum_auth += authpath(leaf, height)
 
+    # Remove duplicates and remove all nodes that are
+    # present on the path to any given leaf
     combined_path = set(accum_auth) - set(accum_path)
 
     # print("Given leaves: " + str(leaves))
@@ -48,10 +50,8 @@ def sample(numleaves, height):
     # print("Length of combined path: {}".format(len(combined_path)))
     return len(combined_path)
 
-def test():
-    tests = 2**16
-    numleaves = 32
-    height = 16
+def test(tests, numleaves, height):
+    # Accumulate the test results
     results = [sample(numleaves, height) for test in range(0, tests)]
     print("# leaves: {}".format(numleaves))
     print("height: {}".format(height))
@@ -63,7 +63,8 @@ def test():
     print("Avg: {}".format(sum(results) / len(results)))
 
 if __name__ == '__main__':
-    numleaves = 32;
-    height = 16;
+    tests = 2**16
+    numleaves = 32
+    height = 16
     #sample(numleaves, height)
-    test()
+    test(tests, numleaves, height)
