@@ -31,7 +31,7 @@ def pick_leaves(numleaves, height):
         leaves.append(randint(0, 2**height))
     return leaves
 
-def sample(numleaves, height):
+def sample(numleaves, height, cut=0):
     leaves = pick_leaves(numleaves, height)
     accum_path = []
     accum_auth = []
@@ -43,18 +43,27 @@ def sample(numleaves, height):
     # present on the path to any given leaf
     combined_path = set(accum_auth) - set(accum_path)
 
+    if cut > 0:
+        # Remove all elements that are higher than layer height - cut
+        reduced_path = [(i, j) for (i, j) in combined_path if i < height - cut]
+        # Add all elements on layer height - cut
+        reduced_path += [(height - cut, i) for i in range(0, 2**cut)]
+    else:
+        reduced_path = combined_path
+
     # print("Given leaves: " + str(leaves))
     # print("Combined auth path:\n")
     # for node in combined_path: print(str(node) + " ")
     # print("Length of separate paths: {}".format(numleaves * height))
     # print("Length of combined path: {}".format(len(combined_path)))
-    return len(combined_path)
+    return len(reduced_path)
 
-def test(tests, numleaves, height):
+def test(tests, numleaves, height, cut):
     # Accumulate the test results
-    results = [sample(numleaves, height) for test in range(0, tests)]
+    results = [sample(numleaves, height, cut) for test in range(0, tests)]
     print("# leaves: {}".format(numleaves))
     print("height: {}".format(height))
+    print("cut: {}".format(cut))
     print("# samples: {}".format(tests))
     print("Length of separate paths: {}".format(numleaves * height))
     print("Combined paths:")
@@ -63,8 +72,9 @@ def test(tests, numleaves, height):
     print("Avg: {}".format(sum(results) / len(results)))
 
 if __name__ == '__main__':
-    tests = 2**16
+    tests = 2**14
     numleaves = 32
     height = 16
-    #sample(numleaves, height)
-    test(tests, numleaves, height)
+    cut = 0
+    #sample(numleaves, height, cut)
+    test(tests, numleaves, height, cut)
