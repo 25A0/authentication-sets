@@ -16,10 +16,7 @@ def auth_path(index, height):
     layer = 0
     authpath = []
     while layer < height:
-        if index % 2 == 0:
-            authpath.append((layer, index + 1))
-        else:
-            authpath.append((layer, index - 1))
+        authpath.append((layer, index ^ 1))
         layer += 1
         index >>= 1
 
