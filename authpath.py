@@ -70,9 +70,7 @@ def pick_leaves(numleaves, height):
         leaves.append(randint(0, 2**height))
     return leaves
 
-# Calculates and returns the authentication set of the given leaves
-# in a binary tree of the given height.
-# _cut_
+# Naive implementation. See authpath.c for fast implementation
 def auth_set(leaves, height):
     """Return the authentication set of the given leaves.
 
@@ -99,11 +97,6 @@ def auth_set(leaves, height):
     # present on the path to any given leaf
     combined_path = set(accum_auth) - set(accum_path)
 
-    # print("Given leaves: " + str(leaves))
-    # print("Combined auth path:\n")
-    # for node in combined_path: print(str(node) + " ")
-    # print("Length of separate paths: {}".format(numleaves * height))
-    # print("Length of combined path: {}".format(len(combined_path)))
     return combined_path
 
 def trim(set, height, level):
