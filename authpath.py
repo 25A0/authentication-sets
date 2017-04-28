@@ -26,13 +26,20 @@ def path(index, height):
     return path
 
 def pick_leaves(numleaves, height):
+    # Best case scenario:
+    # leaves = range(0, numleaves)
+
+    # Worst case scenario:
+    # spacing = 2**height / numleaves
+    # leaves = [i * spacing for i in range(0, numleaves)]
+
+    # Random leaves:
     leaves = []
     for i in range(0, numleaves):
         leaves.append(randint(0, 2**height))
     return leaves
 
-def sample(numleaves, height, cut=0):
-    leaves = pick_leaves(numleaves, height)
+def sample(leaves, height, cut=0):
     accum_path = []
     accum_auth = []
     for leaf in leaves:
@@ -60,7 +67,8 @@ def sample(numleaves, height, cut=0):
 
 def test(tests, numleaves, height, cut):
     # Accumulate the test results
-    results = [sample(numleaves, height, cut) for test in range(0, tests)]
+    results = [sample(pick_leaves(numleaves, height), height, cut)
+               for test in range(0, tests)]
     print("# leaves: {}".format(numleaves))
     print("height: {}".format(height))
     print("cut: {}".format(cut))
