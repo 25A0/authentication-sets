@@ -73,18 +73,16 @@ def pick_leaves(numleaves, height):
 # Calculates and returns the authentication set of the given leaves
 # in a binary tree of the given height.
 # _cut_
-def auth_set(leaves, height, cut=0):
+def auth_set(leaves, height):
     """Return the authentication set of the given leaves.
+
+    The authentication set is the minimal set of nodes necessary to restore the
+    root of the binary hash tree from the given leaves.
 
     Keyword arguments:
     leaves -- the set of given leaves as a list of indices in
               range [0, 2^height-1]
     height -- the height of the binary hash tree
-    cut    -- (optional) If cut is specified, cuts off the given number
-              of levels from the top of the tree. This removes all nodes
-              above the cut off leve, and all nodes on the cut off level.
-              This mimics the optimisation that is applied in SPHINCS at
-              level 10.
 
     Returns:
     The minimal list of nodes that is needed to restore the root of the binary
@@ -101,49 +99,105 @@ def auth_set(leaves, height, cut=0):
     # present on the path to any given leaf
     combined_path = set(accum_auth) - set(accum_path)
 
-    if cut > 0:
-        # Remove all elements that are higher than layer height - cut
-        reduced_path = [(i, j) for (i, j) in combined_path if i < height - cut]
-        # Add all elements on layer height - cut
-        reduced_path += [(height - cut, i) for i in range(0, 2**cut)]
-    else:
-        reduced_path = combined_path
-
     # print("Given leaves: " + str(leaves))
     # print("Combined auth path:\n")
     # for node in combined_path: print(str(node) + " ")
     # print("Length of separate paths: {}".format(numleaves * height))
     # print("Length of combined path: {}".format(len(combined_path)))
-    return reduced_path
+    return combined_path
 
-def measure(tests, numleaves, height, cut):
+def trim(set, height, level):
+    """Trim the given set to the given level and add all nodes of that level.
+
+    Removes all nodes in the given set that are above the given level, and add
+    all nodes of the given level. In cases where the set contains a lot of
+    duplicate nodes in upper levels, this can reduce the overall size of the
+    set.
+
+    This optimiszation is applied in SPHINCS at level 10 in a binary tree of
+    height 16.
+
+    Keyword arguments:
+    set -- the set of nodes, where each node is represented as a tuple
+           consisting of the node's layer and the node's index within this layer
+    height -- the height of the binary hash tree
+    level -- the level at which to trim the set
+
+    """
+    cut = height - level
+    if cut > 0:
+        # Remove all elements that are at or higher than the given level
+        reduced_set = [(i, j) for (i, j) in set if i < level]
+        # Add all elements on that level
+        reduced_set += [(level, i) for i in range(0, 2**cut)]
+        return reduced_set
+    else:
+        return set
+
+def sample_authset(numleaves, height):
+    """Sample the size of an authentication set.
+
+    Keyword arguments:
+    numleaves -- the number of given leaves which will be picked randomly
+    height    -- the height of the binary hash tree
+
+    Returns:
+    The length of the generated authentication set.
+    """
+    leaves = pick_leaves(numleaves, height)
+    authset = auth_set(leaves, height)
+
+    return len(authset)
+
+def sample_sphincs(numleaves, height):
+    """Sample the size of the authentication paths as produced by SPHINCS.
+
+    Keyword arguments:
+    numleaves -- the number of given leaves which will be picked randomly
+    height    -- the height of the binary hash tree
+
+    Returns:
+    The overall number of nodes stored by SPHINCS to authenticate the given
+    number of leaves
+    """
+    leaves = pick_leaves(numleaves, height)
+    accum_auth = []
+    for leaf in leaves:
+        accum_auth += auth_path(leaf, height)
+    trimmed_set = trim(accum_auth, height, 10)
+
+    return len(trimmed_set)
+
+def measure(tests, numleaves, height):
     """Measure the size of the authentication set.
 
     Keyword arguments:
     tests     -- the number of tests
     numleaves -- the number of given leaves
     height    -- the height of the binary hash tree
-    cut       -- the number of levels that are cut off the top of the tree
 
     Prints various statistics summarising the measurement.
     """
     # Accumulate the test results
-    results = [len(auth_set(pick_leaves(numleaves, height), height, cut))
-               for test in range(0, tests)]
+    results_authsets = [sample_authset(numleaves, height)
+                        for test in range(0, tests)]
+    results_sphincs  = [sample_sphincs(numleaves, height)
+                        for test in range(0, tests)]
     print("# leaves: {}".format(numleaves))
     print("height: {}".format(height))
-    print("cut: {}".format(cut))
     print("# samples: {}".format(tests))
     print("Length of separate paths: {}".format(numleaves * height))
-    print("Combined paths:")
-    print("Min: {}".format(min(results)))
-    print("Max: {}".format(max(results)))
-    print("Avg: {}".format(sum(results) / len(results)))
+    print("Authentication sets:")
+    print("Min: {}".format(min(results_authsets)))
+    print("Max: {}".format(max(results_authsets)))
+    print("Avg: {}".format(sum(results_authsets) / len(results_authsets)))
+    print("SPHINCS:")
+    print("Min: {}".format(min(results_sphincs)))
+    print("Max: {}".format(max(results_sphincs)))
+    print("Avg: {}".format(sum(results_sphincs) / len(results_sphincs)))
 
 if __name__ == '__main__':
     tests = 2**14
     numleaves = 32
     height = 16
-    cut = 0
-    #sample(numleaves, height, cut)
-    measure(tests, numleaves, height, cut)
+    measure(tests, numleaves, height)
