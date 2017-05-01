@@ -68,15 +68,23 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
       }
     }
 
-    // Add the first d-1 elements of the current leaf's authentication path to
-    // the authentication set
+    // Check for the first d-1 elements of the current leaf's authentication
+    // path whether they're on the stack. If they are, pop them from the stack.
+    // Otherwise add them to the authentication set.
     {
       int j;
       unsigned long index = leaf;
       for(j = 0; j < d - 1; j++) {
-        auth_set[nnodes].level = j;
-        auth_set[nnodes].index = index ^ (unsigned long) 1; // flip the last bit
-        nnodes++;
+        // Check if the layer of this node is at the head of the stack
+        if(stackp > stack && *(stackp-1) == j) {
+          // pop that layer from the stack
+          stackp--;
+        } else {
+          // add that node to the authentication set
+          auth_set[nnodes].level = j;
+          auth_set[nnodes].index = index ^ (unsigned long) 1; // flip the last bit
+          nnodes++;
+        }
         index >>= 1;
       }
     }
