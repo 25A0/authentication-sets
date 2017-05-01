@@ -47,9 +47,9 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
   unsigned int nunique = unique(nleaves, given_leaves);
 
   unsigned int nnodes = 0; // The number of nodes in the authentication set
-  struct node stack[height]; // A stack that holds nodes that do not need to be
-                             // included in the authentication set
-  struct node* stackp = stack; // Pointer to the top of the stack
+  unsigned int stack[height]; // A stack that holds the layers on which no nodes
+                              // need to be included.
+  unsigned int* stackp = stack; // Pointer to the top of the stack
 
   // For all but the last leaf:
   int i;
@@ -81,22 +81,22 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
       }
     }
 
-    // Calculate the node on this leaf's path that is the child of the common
-    // parent, and push that to the stack
-    stackp->level = d - 1;
-    stackp->index = leaf >> (d - 1);
+    // Calculate the layer of the node on this leaf's path that is the child of
+    // the common parent, and push that layer to the stack
+    *stackp = d - 1;
     stackp++;
   }
 
   // Finally, for the last leaf: Add each node of the authentication path of
-  // this leaf to the authentication set, unless it's on the stack.
+  // this leaf to the authentication set, unless it's layer is at the head of
+  // the stack.
   int stack_count = stackp - stack;
   stackp--; // Point to last pushed element
   int j;
   unsigned long index = given_leaves[nunique - 1];
   for(j = 0; j < height; j++) {
     index ^= (unsigned long) 1;
-    if(stack_count > 0 && stackp->level == j && stackp->index == index) {
+    if(stack_count > 0 && *stackp == j) {
       // Pop that element from the stack
       stackp--;
     } else {
