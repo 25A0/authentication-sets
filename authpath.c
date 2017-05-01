@@ -51,14 +51,13 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
                               // need to be included.
   unsigned int* stackp = stack; // Pointer to the top of the stack
 
-  // For all but the last leaf:
   int i;
-  for(i = 0; i < nunique - 1; i++) {
+  for(i = 0; i < nunique; i++) {
     unsigned long leaf = given_leaves[i];
 
-    // distance to common parent of this leaf and the next leaf
+    // distance to common parent of this leaf and the next leaf, if there is one
     unsigned int d = 0;
-    {
+    if(i < nunique - 1) {
       unsigned long current = leaf;
       unsigned long next = given_leaves[i+1];
       while(current != next) {
@@ -66,6 +65,8 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
         next >>= 1;
         d++;
       }
+    } else {
+      d = height;
     }
 
     // Check for the first d-1 elements of the current leaf's authentication
@@ -93,27 +94,6 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
     // the common parent, and push that layer to the stack
     *stackp = d - 1;
     stackp++;
-  }
-
-  // Finally, for the last leaf: Add each node of the authentication path of
-  // this leaf to the authentication set, unless it's layer is at the head of
-  // the stack.
-  int stack_count = stackp - stack;
-  stackp--; // Point to last pushed element
-  int j;
-  unsigned long index = given_leaves[nunique - 1];
-  for(j = 0; j < height; j++) {
-    index ^= (unsigned long) 1;
-    if(stack_count > 0 && *stackp == j) {
-      // Pop that element from the stack
-      stackp--;
-    } else {
-      // Add that element to the authentication set
-      auth_set[nnodes].level = j;
-      auth_set[nnodes].index = index;
-      nnodes++;
-    }
-    index >>= 1;
   }
 
   return nnodes;
