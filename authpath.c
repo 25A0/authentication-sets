@@ -33,6 +33,20 @@ struct node {
   unsigned long index;
 };
 
+/* Calculates the distance in layers between the leaf at index i1 and the
+ * node that is the first common parent node of the leaves at index i1 and i2.
+ */
+unsigned int parent_distance(unsigned long i1, unsigned long i2)
+{
+  unsigned int d = 0;
+  while(i1 != i2) {
+    i1 >>= 1;
+    i2 >>= 1;
+    d++;
+  }
+  return d;
+}
+
 /* Calculates the authentication set for the given leaves.  auth_set should be
  * large enough to hold height * nleaves nodes (TODO: adjust this to the #
  * nodes in the worst case scenario)
@@ -58,13 +72,7 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
     // distance to common parent of this leaf and the next leaf, if there is one
     unsigned int d = 0;
     if(i < nunique - 1) {
-      unsigned long current = leaf;
-      unsigned long next = given_leaves[i+1];
-      while(current != next) {
-        current >>= 1;
-        next >>= 1;
-        d++;
-      }
+      d = parent_distance(leaf, given_leaves[i+1]);
     } else {
       d = height;
     }
