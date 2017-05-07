@@ -136,6 +136,84 @@ def unique(sorted_list):
 
     return res
 
+def verify(hashed_leaves, auth_set, height, hashfun):
+    """Restore and return the root of the binary tree
+
+    Keyword arguments:
+    hashed_leaves -- A list of tuples (i, hash) containing the hased secret
+                      key components which form the leaves of the tree,
+                      sorted and with duplicates removed
+    auth_set   -- A list of tuples ((h, i), hash) defining the height,
+                  index and hash of the nodes that are required in
+                  addition to the given leaves to restore the root node
+    height     -- the height of the binary tree
+    hashfun    -- a hash function of 2n -> n that is used to produce the
+                  parent node from its two child nodes
+
+    Returns:
+    The hash at the tree's root node
+    """
+    stack = []
+    i_auth = 0
+    i_leaf = 0
+    hash_stage = [None, None]
+    while i_auth < len(auth_set) or i_leaf < len(hashed_leaves):
+        # Pick the next given leaf
+        height = 0
+        index, current_hash = hashed_leaves[i_leaf]
+        i_leaf += 1
+        while True:
+            hash_stage[index % 2] = current_hash
+            needed_node = (height, index ^ 1)
+            # Consume as many nodes from the stack and the auth set as possible
+            if len(stack) > 0 and needed_node == stack[-1][0]:
+                _, hash_stage[(index % 2) ^ 1] = stack.pop()
+            elif i_auth < len(auth_set) and needed_node == auth_set[i_auth][0]:
+                _, hash_stage[(index % 2) ^ 1] = auth_set[i_auth]
+                i_auth += 1
+            else: break
+            current_hash = hashfun(hash_stage[0], hash_stage[1])
+            height += 1
+            index >>= 1
+        stack.append(((height, index), current_hash))
+        print("New stack: {}".format(stack))
+        print("Remaining auth nodes: {}".format(auth_set[i_auth:]))
+
+    assert(len(stack) == 1 and (height, 0) == stack[0][0])
+    # Return the root's hash
+    return stack[0][1]
+
+# HORST signature illustration
+def auth_set(hashed_sks, auth_set_indices, height, hashfun):
+    """Return the authentication set defined by the given indices.
+
+    Keyword arguments:
+    hashed_sks       -- the hased secret key components which form the
+                        leaves of the tree
+    auth_set_indices -- A list of tuples (h, i) defining the height and index of
+                        the nodes that should end up in the authentication set
+    height           -- the height of the binary tree
+    hashfun          -- a hash function of 2n -> n that is used to produce the
+                        parent node from its two child nodes
+
+    Returns:
+    A list containing tuples ((h, i), hash), the height, index, and hash of the
+    node in the authentication set. The order of the nodes in the returned list
+    is equal to the order of the nodes in auth_set_indices.
+    """
+    tree = [None] * height
+    tree[0] = hashed_sks # the leaves
+    for current_height in range(1, height): # We don't need to compute the root,
+                                            # otherwise this would be off by one
+        num_nodes = 2**(height - current_height)
+        tree[current_height] = [None] * num_nodes
+        for index in range(0, num_nodes):
+            left  = tree[current_height - 1][2*index]
+            right = tree[current_height - 1][2*index + 1]
+            tree[current_height][index] = hashfun(left, right)
+
+    return [((h, i), tree[h][i]) for h, i in auth_set_indices]
+
 # Efficient implementation
 def efficient_auth_set_indices(leaves, height):
     """Return the authentication set of the given leaves.
