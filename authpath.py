@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from random import randint
+from random import randrange
 
 def auth_path(index, height):
     """Return the authentication path for a leaf at the given index.
@@ -65,7 +65,7 @@ def pick_leaves(numleaves, height):
     # Random leaves:
     leaves = []
     for i in range(0, numleaves):
-        leaves.append(randint(0, 2**height))
+        leaves.append(randrange(0, 2**height))
     return leaves
 
 # Naive implementation. See authpath.c for fast implementation
