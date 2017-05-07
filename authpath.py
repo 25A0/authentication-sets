@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from random import randint
 
 def auth_path(index, height):
