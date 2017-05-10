@@ -165,10 +165,12 @@ def verify(hashed_leaves, auth_set, height, hashfun):
         while True:
             hash_stage[index % 2] = current_hash
             needed_node = (height, index ^ 1)
-            # Consume as many nodes from the stack and the auth set as possible
+            # Consume as many nodes from the stack and
+            # the auth set as possible
             if len(stack) > 0 and needed_node == stack[-1][0]:
                 _, hash_stage[(index % 2) ^ 1] = stack.pop()
-            elif i_auth < len(auth_set) and needed_node == auth_set[i_auth][0]:
+            elif i_auth < len(auth_set) and \
+                 needed_node == auth_set[i_auth][0]:
                 _, hash_stage[(index % 2) ^ 1] = auth_set[i_auth]
                 i_auth += 1
             else: break
@@ -319,7 +321,7 @@ def sample_sphincs(numleaves, height):
 
     return len(trimmed_set)
 
-def measure(tests, numleaves, height):
+def compare(tests, numleaves, height):
     """Measure the size of the authentication set.
 
     Keyword arguments:
@@ -353,8 +355,10 @@ def measure(tests, numleaves, height):
     print("Max: {}".format(max(results_sphincs)))
     print("Avg: {}".format(sum(results_sphincs) / len(results_sphincs)))
 
+
 if __name__ == '__main__':
-    tests = 2**14
+    tests = 2**16
     numleaves = 32
     height = 16
-    measure(tests, numleaves, height)
+    compare(tests, numleaves, height)
+
