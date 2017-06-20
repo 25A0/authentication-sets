@@ -19,7 +19,7 @@ def plot_dist_sphincs():
 
     plot = df['Size'].plot.hist(by="Size", bins = 350, legend=True)
     fig = plot.get_figure()
-    fig.savefig("sphincs_distribution.pdf")
+    fig.savefig("figures/sphincs_distribution.pdf")
 
 def plot_num_leaves():
     tests = 2**10
@@ -34,7 +34,7 @@ def plot_num_leaves():
 
     plot = df.boxplot(column="ratio", by="# given leaves")
     fig = plot.get_figure()
-    fig.savefig("num_leaves.pdf")
+    fig.savefig("figures/num_leaves.pdf")
 
 if __name__ == '__main__':
     pass
