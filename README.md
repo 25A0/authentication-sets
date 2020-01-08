@@ -5,6 +5,7 @@ Code and statistics related to authentication sets can be found here.
  - [authset.py](./authset.py) contains a Python implementation of
    authentication sets, as well as code to run tests to compare authentication
    sets to the original optimization used in SPHINCS.
+   Run `python3 authset.py` to run tests on the performance of authentication sets.
  - [authset.c](./authset.c) contains a C implementation of authentication sets,
    and some demo code to illustrate how to use it.
  - [plot.py](./plot.py) contains code to produce the plots in this README
