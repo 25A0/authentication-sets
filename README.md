@@ -12,7 +12,7 @@ Code and statistics related to authentication sets can be found here.
  - [measure.py](./measure.py) contains code to export test data as a csv
 
 This work is part of my master's thesis, which is yet to be published.
-More information related to authentication sets can be found in there.
+More information related to authentication sets will be available in there.
 
 ## What are authentication sets?
 
