@@ -6,6 +6,34 @@ static int cmp(const void* a, const void* b)
   return *(unsigned long *)a - *(unsigned long *)b;
 }
 
+unsigned int compute_worst_case_size(unsigned int height,
+                                     unsigned int num_leaves)
+{
+  if(num_leaves == 0) return 0;
+
+  // There are faster methods to compute the Hamming Weight and the logarithm
+  // base 2 (https://graphics.stanford.edu/~seander/bithacks.html), but this
+  // function has to be called only once per signature / verification, with
+  // small*ish values for num_leaves, and is already in O(log_2(num_leaves)).
+
+  // the lowest layer on which all leaves are children of different subtrees:
+  // layer = h - ceil(log_2(num_leaves))
+  //       = h + 1 - log_2(2 * num_leaves - 1)
+  unsigned int layer = height + 1;
+  unsigned int l = 2 * num_leaves - 1;
+  for (; l; layer--) {
+    l >>= 1;
+  }
+
+  unsigned int H; // Hamming-Weight of num_leaves - 1
+  unsigned int x = num_leaves - 1;
+  for (H=0; x; H++) {
+    x &= x - 1;
+  }
+
+  return height + (num_leaves - 1) * layer - H;
+}
+
 /* Removes duplicates in sorted_leaves in-place and returns the number of
  * unique elements. As the name suggests, sorted_leaves should be sorted,
  * or at least have all duplicates in groups.
@@ -48,8 +76,7 @@ unsigned int parent_distance(unsigned long i1, unsigned long i2)
 }
 
 /* Calculates the authentication set for the given leaves.  auth_set should be
- * large enough to hold height * nleaves nodes (TODO: adjust this to the #
- * nodes in the worst case scenario)
+ * large enough to hold sufficient nodes for the worst-case scenario.
  */
 unsigned int authentication_set(unsigned int nleaves, unsigned int height,
                                 unsigned long* given_leaves,
@@ -103,22 +130,28 @@ unsigned int authentication_set(unsigned int nleaves, unsigned int height,
     *stackp = d - 1;
     stackp++;
   }
-
   return nnodes;
 }
 
 int main(int nargs, const char** args)
 {
-  unsigned long given_leaves[] = {1, 4, 7};
-  unsigned int nleaves = 3;
-  unsigned int height = 3;
-  struct node auth_set[height * nleaves];
+  unsigned int height = 16;
+  unsigned int nleaves = 32;
+  unsigned long given_leaves[nleaves];
+  int i;
+  for(i = 0; i < nleaves; i++) {
+    given_leaves[i] = i * 2048;
+  }
+
+  unsigned int worst_case_size = compute_worst_case_size(height, nleaves);
+  printf("worst case size: %d\n", worst_case_size);
+
+  struct node auth_set[worst_case_size];
   unsigned int nnodes = authentication_set(nleaves, height, given_leaves,
                                            auth_set);
-  int i;
   printf("# nodes: %d\n", nnodes);
-  for(i = 0; i < nnodes; i++) {
-    printf("%d: level %d, index %ld\n", i, auth_set[i].level, auth_set[i].index);
-  }
+  // for(i = 0; i < nnodes; i++) {
+  // printf("%d: level %d, index %ld\n", i, auth_set[i].level, auth_set[i].index);
+  // }
   return 0;
 }
