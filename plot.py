@@ -6,7 +6,7 @@ import authpath
 
 matplotlib.use("Agg")
 
-def plot_dist_sphincs():
+def plot_dist_sphincs(fname):
     tests = 2**16
     numleaves = 32
     height = 16
@@ -19,9 +19,9 @@ def plot_dist_sphincs():
 
     plot = df['Size'].plot.hist(by="Size", bins = 350, legend=True)
     fig = plot.get_figure()
-    fig.savefig("figures/sphincs_distribution.pdf")
+    fig.savefig(fname)
 
-def plot_num_leaves():
+def plot_num_leaves(fname):
     tests = 2**10
     height = 16
     data = [(leaves, \
@@ -34,7 +34,7 @@ def plot_num_leaves():
 
     plot = df.boxplot(column="ratio", by="# given leaves")
     fig = plot.get_figure()
-    fig.savefig("figures/num_leaves.pdf")
+    fig.savefig(fname)
 
 if __name__ == '__main__':
     pass
