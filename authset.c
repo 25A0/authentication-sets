@@ -6,6 +6,16 @@ static int cmp(const void* a, const void* b)
   return *(unsigned long *)a - *(unsigned long *)b;
 }
 
+unsigned int ceil_log_2(unsigned int n)
+{
+  unsigned int r = 0;
+  n = 2 * n - 1;
+  for (; n; r++) {
+    n >>= 1;
+  }
+  return r - 1;
+}
+
 unsigned int compute_worst_case_size(unsigned int height,
                                      unsigned int num_leaves)
 {
@@ -19,11 +29,7 @@ unsigned int compute_worst_case_size(unsigned int height,
   // the lowest layer on which all leaves are children of different subtrees:
   // layer = h - ceil(log_2(num_leaves))
   //       = h + 1 - log_2(2 * num_leaves - 1)
-  unsigned int layer = height + 1;
-  unsigned int l = 2 * num_leaves - 1;
-  for (; l; layer--) {
-    l >>= 1;
-  }
+  unsigned int layer = height -  ceil_log_2(num_leaves);
 
   unsigned int H; // Hamming-Weight of num_leaves - 1
   unsigned int x = num_leaves - 1;
@@ -138,18 +144,32 @@ int main(int nargs, const char** args)
   unsigned int height = 16;
   unsigned int nleaves = 32;
   unsigned long given_leaves[nleaves];
+
   int i;
+
+  // Populate the given leaves with the worst-case scenario
+  unsigned int offset = 1 << (height - ceil_log_2(nleaves));
   for(i = 0; i < nleaves; i++) {
-    given_leaves[i] = i * 2048;
+    given_leaves[i] = i * offset;
   }
 
+  /*
+  // Populate the given leaves with the best-case scenario
+  for(i = 0; i < nleaves; i++) {
+    given_leaves[i] = i;
+  }
+  */
+
   unsigned int worst_case_size = compute_worst_case_size(height, nleaves);
-  printf("worst case size: %d\n", worst_case_size);
 
   struct node auth_set[worst_case_size];
   unsigned int nnodes = authentication_set(nleaves, height, given_leaves,
                                            auth_set);
-  printf("# nodes: %d\n", nnodes);
+
+  printf("auth set worst case size: %4d\n", worst_case_size);
+  printf("sum of auth paths:        %4d\n", nleaves * height);
+  printf("actual auth set size:     %4d\n", nnodes);
+  printf("reduction by:              %6.2f%%\n", 100 * (1.0 - ((float) nnodes / (float) (nleaves * height))));
   // for(i = 0; i < nnodes; i++) {
   // printf("%d: level %d, index %ld\n", i, auth_set[i].level, auth_set[i].index);
   // }
