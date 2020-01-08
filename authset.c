@@ -1,6 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/*
+  This file contains a C implementation to generate the authentication
+  set of a given set of leaf nodes, as well as some demo code to
+  illustrate how it can be used.
+ */
+
 static int cmp(const void* a, const void* b)
 {
   return *(unsigned long *)a - *(unsigned long *)b;

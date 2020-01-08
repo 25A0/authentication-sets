@@ -291,8 +291,8 @@ def sample_authset(numleaves, height, function):
     numleaves -- the number of given leaves which will be picked randomly
     height    -- the height of the binary hash tree
     function  -- the function that is used to sample the result. Should be
-                 naive_auth_set or efficient_auth_set, or another function
-                 with the same signature
+                 naive_auth_set_indices or efficient_auth_set_indices, or
+                 another function with the same signature
 
     Returns:
     The length of the generated authentication set.
