@@ -34,6 +34,7 @@ def plot_num_leaves(fname):
 
     plot = df.boxplot(column="ratio", by="# given leaves")
     fig = plot.get_figure()
+    fig.suptitle("Authentication set size compared to sum of authentication paths.")
     fig.savefig(fname)
 
 if __name__ == '__main__':
