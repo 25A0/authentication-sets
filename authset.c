@@ -27,23 +27,16 @@ unsigned int compute_worst_case_size(unsigned int height,
 {
   if(num_leaves == 0) return 0;
 
-  // There are faster methods to compute the Hamming Weight and the logarithm
-  // base 2 (https://graphics.stanford.edu/~seander/bithacks.html), but this
-  // function has to be called only once per signature / verification, with
-  // small*ish values for num_leaves, and is already in O(log_2(num_leaves)).
+  // the height of the smallest binary tree that can contain
+  // num_leaves unique leaves:
+  // h_l = ceil(log_2(num_leaves))
+  unsigned int h_l = ceil_log_2(num_leaves);
 
   // the lowest layer on which all leaves are children of different subtrees:
-  // layer = h - ceil(log_2(num_leaves))
-  //       = h + 1 - log_2(2 * num_leaves - 1)
-  unsigned int layer = height -  ceil_log_2(num_leaves);
+  // l = h - h_l
+  unsigned int l = height - h_l;
 
-  unsigned int H; // Hamming-Weight of num_leaves - 1
-  unsigned int x = num_leaves - 1;
-  for (H=0; x; H++) {
-    x &= x - 1;
-  }
-
-  return height + (num_leaves - 1) * layer - H;
+  return num_leaves * l + (1 << h_l) - num_leaves;
 }
 
 /* Removes duplicates in sorted_leaves in-place and returns the number of
