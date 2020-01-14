@@ -43,7 +43,7 @@ compares to the combined size of the authentication paths, in a tree of
 height 16. For example, if 16 leaf nodes are given, authentication sets are on
 average 30% smaller than the sum of the authentication paths.
 
-![](num_leaves.png)
+![A graph that compares the size of the authentication path to the size of the sum of the authentication sets, for varous numbers of given leaf nodes. The graph shows that authentication sets become increasingly small compared to the sum of authentication sets, the more leaf nodes are given.](num_leaves.png)
 
 In the best case scenario, authentication sets can be drastically smaller than
 the sum of the authentication paths. For example, in a binary tree of height
@@ -54,7 +54,7 @@ closer to the worst-case size. The following graph shows how the size of
 authentication sets are distributed for 32 given leaf nodes in a tree of height
 16:
 
-![](sphincs_distribution.png)
+![A histogram that shows the distribution of authentication set sizes for various samples of 32 given leaf nodes in a tree of height 16. The histogram shows that the average sample size lies between 320 and 330 nodes, and that barely any samples have a size smaller than 300 nodes.](sphincs_distribution.png)
 
 Nonetheless, here the worst-case size of the authentication set, 352 nodes, is
 still significantly smaller than the combined size of the separate
